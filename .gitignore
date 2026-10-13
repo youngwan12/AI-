@@ -1,0 +1,7 @@
+# 대회 데이터는 DACON에서 받아 data/ 에 둔다 (재배포 X)
+data/*.csv
+outputs/oof/
+catboost_info/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

@@ -1,0 +1,24 @@
+00_prior                     logloss 0.8824
+01_baseline_rf               logloss 0.9242 (±0.0162)  acc 0.7027  macroF1 0.5589  5.7s
+01b_rf_tuned_raw             logloss 0.7201 (±0.0031)  acc 0.7135  macroF1 0.5021  36.9s
+02_logreg_fe                 logloss 0.8575 (±0.0035)  acc 0.6454  macroF1 0.2830  12.2s
+03_rf_fe                     logloss 0.7262 (±0.0046)  acc 0.7126  macroF1 0.5020  62.7s
+03b_rf_default_fe            logloss 0.8785 (±0.0192)  acc 0.7024  macroF1 0.5397  7.5s
+04_lgbm_fe                   logloss 0.7153 (±0.0070)  acc 0.7166  macroF1 0.5156  60.8s
+05_catboost_fe               logloss 0.7383 (±0.0079)  acc 0.7100  macroF1 0.4859  686.3s
+06_catboost_fe_id            logloss 0.6750 (±0.0065)  acc 0.7363  macroF1 0.5790  154.7s
+07_lgbm_fe_id                logloss 0.7121 (±0.0072)  acc 0.7182  macroF1 0.5190  60.8s
+08_ensemble                  logloss 0.6748  weights cb/lgb/rf = [0.932, 0.068, 0.0]
+
+              name  logloss  fold_std  accuracy  macro_f1  seconds
+         00_prior   0.8824    0.0000    0.6413    0.2605      0.0
+   01_baseline_rf   0.9242    0.0162    0.7027    0.5589      5.7
+ 01b_rf_tuned_raw   0.7201    0.0031    0.7135    0.5021     36.9
+     02_logreg_fe   0.8575    0.0035    0.6454    0.2830     12.2
+         03_rf_fe   0.7262    0.0046    0.7126    0.5020     62.7
+03b_rf_default_fe   0.8785    0.0192    0.7024    0.5397      7.5
+       04_lgbm_fe   0.7153    0.0070    0.7166    0.5156     60.8
+   05_catboost_fe   0.7383    0.0079    0.7100    0.4859    686.3
+06_catboost_fe_id   0.6750    0.0065    0.7363    0.5790    154.7
+    07_lgbm_fe_id   0.7121    0.0072    0.7182    0.5190     60.8
+      08_ensemble   0.6748       NaN    0.7358    0.5744      0.0

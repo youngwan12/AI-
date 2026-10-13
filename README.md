@@ -12,6 +12,8 @@ src/baseline_dacon.py  DACON 공식 Baseline 노트북을 그대로 옮긴 것
 src/features.py        전처리 + 파생변수
 src/train.py           Baseline부터 단계별 실험 (5-fold) + 제출 파일 생성
 src/report.py          발표용 그림 (실험 결과, 혼동행렬, 신뢰도 곡선, 변수 중요도)
+src/improve.py         추가 실험: 고객 이력 target encoding, 동일 카드 정보, 고객 내 상대 위치
+src/ceiling.py         정확도 상한 분석 (같은 입력의 정답 불일치, Top-2, 확신도별 정확도)
 outputs/results.csv    실험별 점수
 outputs/submission_*.csv  DACON 제출 파일
 outputs/figures/       그림
@@ -25,6 +27,8 @@ python src/eda.py      # 1분 이내
 python src/train.py    # 약 20분 (CatBoost가 대부분, CPU 4코어 기준), 로그는 outputs/train_log.txt
 python src/baseline_dacon.py  # 1분, 공식 Baseline 점수를 results.csv 맨 위에 추가
 python src/report.py   # 1분 이내
+python src/improve.py  # 약 6분, 최종 블렌드 + outputs/submission_blend.csv
+python src/ceiling.py  # 1분 이내
 ```
 
 ## 사전 실험 결과 (Stratified 5-fold OOF, seed 42)
@@ -59,9 +63,36 @@ python src/report.py   # 1분 이내
 - 최종 앙상블은 credit 0(신용 가장 좋음)의 재현율이 24%로 낮습니다. 확률 자체는 잘 맞습니다(`outputs/figures/calibration.png`).
 - LightGBM에 고객키를 정수 코드로 넣는 것은 효과가 작습니다(0.7153 → 0.7121). 정수 코드 순서에 의미가 없기 때문이고, OOF target encoding이 다음 개선 후보입니다.
 
+## 추가 실험: 정확도를 더 올릴 수 있나 (`src/improve.py`)
+
+| 실험 | 추가한 것 | LogLoss | Accuracy | Macro F1 |
+| --- | --- | --- | --- | --- |
+| 09_lgbm_te_relative | 고객·동일카드별 정답 비율(fold 밖에서만 계산) + 고객 안 카드 위치 | 0.6737 | 0.7365 | 0.5809 |
+| 10_catboost_fullid_relative | CatBoost에 고객키 + 동일카드키 + 카드 위치 | 0.6741 | 0.7370 | 0.5814 |
+| 11_blend | 09×0.5 + 10×0.3 + 06×0.2 | **0.6717** | **0.7372** | 0.5806 |
+
+LogLoss는 0.6748 → 0.6717로 조금 더 좋아졌지만 정확도는 73~74%에서 더 오르지 않습니다.
+
+## 정확도 90%는 가능한가 (`src/ceiling.py`)
+
+이 데이터로는 정확도 90%가 불가능합니다. 데이터 자체가 그렇습니다.
+
+- **입력이 완전히 같은데 정답이 다른 행이 많습니다.** 신상 정보와 발급월까지 모두 같은 행이 4,497행(2,144그룹)인데, 그룹 안 정답이 모두 같은 경우는 67.1%뿐입니다. 이 행들은 정답을 미리 알고 찍어도 최대 84.0%입니다. 어떤 모델도 같은 입력에 다른 답을 낼 수 없기 때문입니다.
+- 서로 다른 방법 6가지(RF, LightGBM, CatBoost, 고객 이력, 동일 카드, 앙상블)가 모두 73~74%에서 멈춥니다.
+- 학습에 쓴 train으로 다시 채점하면 97.3%가 나오지만, 답을 외운 것이라 의미가 없습니다. test나 DACON 리더보드에서는 그대로 무너집니다.
+
+대신 정직하게 보고할 수 있는 90%대 수치는 다음과 같습니다.
+
+| 지표 | 값 | 뜻 |
+| --- | --- | --- |
+| Top-2 정확도 | **92.9%** | 정답이 모델이 꼽은 상위 2개 등급 안에 있는 비율 |
+| 확신도 상위 14.9% 고객 정확도 | **90% 이상** | 모델이 확신하는 3,941명만 보면 90% 이상 맞힘 |
+| 확신도 상위 47.7% 고객 정확도 | 85% 이상 | 절반 가까운 고객은 85% 이상 |
+
 ## 제출 파일
 
-- `outputs/submission_ensemble.csv` : 최종 후보 (OOF 0.6748)
+- `outputs/submission_blend.csv` : **최종 후보** (OOF LogLoss 0.6717, 정확도 73.7%)
+- `outputs/submission_ensemble.csv` : 이전 최종 (OOF 0.6748)
 - `outputs/submission_catboost_id.csv` : CatBoost 단독 (OOF 0.6750)
 - `outputs/submission_dacon_baseline.csv` : DACON 공식 Baseline (비교용)
 

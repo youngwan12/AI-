@@ -64,7 +64,7 @@ def run_cv(name, fit_predict, X, y, X_test):
 
 
 # ---------------- 모델 정의 ----------------
-def rf_baseline(X_tr, y_tr, X_va, y_va, X_te):
+def rf_default(X_tr, y_tr, X_va, y_va, X_te):
     m = RandomForestClassifier(random_state=SEED, n_jobs=-1)  # 기본 설정 그대로
     m.fit(X_tr, y_tr)
     return m.predict_proba(X_va), m.predict_proba(X_te)
@@ -149,11 +149,10 @@ def main():
     results.append(r)
     print(f"{'00_prior':<28} logloss {r['logloss']:.4f}")
 
-    # --- 0) Baseline: 원본 + 정수 인코딩 + 기본 RandomForest ---
+    # --- 0) 원본 + 정수 인코딩 + 기본 RandomForest (공식 Baseline은 src/baseline_dacon.py) ---
     Xr, Xr_te = raw_features(train, test)
-    r, _, te = run_cv("01_baseline_rf", rf_baseline, Xr, y, Xr_te)
+    r, *_ = run_cv("01_rf_default_raw", rf_default, Xr, y, Xr_te)
     results.append(r)
-    save_submission(te, "baseline_rf", sample)
 
     # 0-b) 원본 그대로, RandomForest 설정만 조정 (튜닝 효과만 분리)
     r, *_ = run_cv("01b_rf_tuned_raw", make_rf_tuned(), Xr, y, Xr_te)
@@ -178,7 +177,7 @@ def main():
     results.append(r)
 
     # 2-b) 전처리 + 파생변수, RandomForest 기본 설정 (전처리 효과만 분리)
-    r, *_ = run_cv("03b_rf_default_fe", rf_baseline, Xo, y, Xo_te)
+    r, *_ = run_cv("03b_rf_default_fe", rf_default, Xo, y, Xo_te)
     results.append(r)
 
     # 3) LightGBM (전처리 + 파생변수)

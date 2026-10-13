@@ -34,11 +34,11 @@ def main():
 
     # 1) 실험별 LogLoss
     fig, ax = plt.subplots(figsize=(9, 4.5))
-    colors = ["#bbbbbb" if n in ("00_prior", "01_baseline_rf") else "#4C72B0" for n in res["name"]]
+    colors = ["#bbbbbb" if n in ("00_dacon_baseline", "00_prior") else "#4C72B0" for n in res["name"]]
     ax.barh(res["name"], res["logloss"], color=colors)
     for i, v in enumerate(res["logloss"]):
         ax.text(v + 0.005, i, f"{v:.4f}", va="center")
-    ax.axvline(res.loc[res["name"] == "01_baseline_rf", "logloss"].item(), color="#C44E52", ls="--", lw=1)
+    ax.axvline(res.loc[res["name"] == "00_dacon_baseline", "logloss"].item(), color="#C44E52", ls="--", lw=1)
     ax.invert_yaxis()
     ax.set_xlabel("5-fold OOF LogLoss (lower is better)")
     ax.set_xlim(0, res["logloss"].max() * 1.15)
@@ -56,10 +56,10 @@ def main():
     plt.close()
 
     # 3) 신뢰도 곡선 (클래스 0 = 신용 좋은 고객의 확률)
-    base = np.load(OUT / "oof" / "01_baseline_rf_oof.npy")
+    base = np.load(OUT / "oof" / "00_dacon_baseline_oof.npy")
     fig, axes = plt.subplots(1, 3, figsize=(14, 4))
     for k, ax in enumerate(axes):
-        for name, p in [("baseline RF", base), ("ensemble", best)]:
+        for name, p in [("DACON baseline", base), ("ensemble", best)]:
             t, m = calibration_curve((y == k).astype(int), p[:, k], n_bins=10, strategy="quantile")
             ax.plot(m, t, marker="o", label=name)
         ax.plot([0, 1], [0, 1], "k--", lw=1)

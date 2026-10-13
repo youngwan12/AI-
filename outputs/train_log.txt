@@ -1,5 +1,5 @@
 00_prior                     logloss 0.8824
-01_baseline_rf               logloss 0.9242 (±0.0162)  acc 0.7027  macroF1 0.5589  5.7s
+01_rf_default_raw              logloss 0.9242 (±0.0162)  acc 0.7027  macroF1 0.5589  5.7s
 01b_rf_tuned_raw             logloss 0.7201 (±0.0031)  acc 0.7135  macroF1 0.5021  36.9s
 02_logreg_fe                 logloss 0.8575 (±0.0035)  acc 0.6454  macroF1 0.2830  12.2s
 03_rf_fe                     logloss 0.7262 (±0.0046)  acc 0.7126  macroF1 0.5020  62.7s
@@ -12,7 +12,7 @@
 
               name  logloss  fold_std  accuracy  macro_f1  seconds
          00_prior   0.8824    0.0000    0.6413    0.2605      0.0
-   01_baseline_rf   0.9242    0.0162    0.7027    0.5589      5.7
+   01_rf_default_raw  0.9242    0.0162    0.7027    0.5589      5.7
  01b_rf_tuned_raw   0.7201    0.0031    0.7135    0.5021     36.9
      02_logreg_fe   0.8575    0.0035    0.6454    0.2830     12.2
          03_rf_fe   0.7262    0.0046    0.7126    0.5020     62.7

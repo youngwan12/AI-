@@ -8,6 +8,7 @@
 ```
 data/                  train.csv, test.csv, sample_submission.csv (DACON에서 받아서 넣기, git에는 안 올림)
 src/eda.py             EDA: 클래스 비율, 결측치, 이상치, 중복 고객 확인 + 그림
+src/baseline_dacon.py  DACON 공식 Baseline 노트북을 그대로 옮긴 것
 src/features.py        전처리 + 파생변수
 src/train.py           Baseline부터 단계별 실험 (5-fold) + 제출 파일 생성
 src/report.py          발표용 그림 (실험 결과, 혼동행렬, 신뢰도 곡선, 변수 중요도)
@@ -22,6 +23,7 @@ outputs/figures/       그림
 pip install -r requirements.txt
 python src/eda.py      # 1분 이내
 python src/train.py    # 약 20분 (CatBoost가 대부분, CPU 4코어 기준), 로그는 outputs/train_log.txt
+python src/baseline_dacon.py  # 1분, 공식 Baseline 점수를 results.csv 맨 위에 추가
 python src/report.py   # 1분 이내
 ```
 
@@ -29,8 +31,9 @@ python src/report.py   # 1분 이내
 
 | 실험 | 바꾼 것 | LogLoss | Accuracy | Macro F1 |
 | --- | --- | --- | --- | --- |
+| 00_dacon_baseline | **DACON 공식 Baseline** (직업 열 삭제, 구간화, RandomForest 기본값) | **1.0738** | 0.6169 | 0.4190 |
 | 00_prior | 모든 행에 클래스 비율(0.122/0.237/0.641)만 예측 | 0.8824 | 0.6413 | 0.2605 |
-| 01_baseline_rf | **Baseline**: 원본 + 정수 인코딩 + RandomForest 기본값 | 0.9242 | 0.7027 | 0.5589 |
+| 01_rf_default_raw | 원본 + 정수 인코딩 + RandomForest 기본값 (구간화 안 함) | 0.9242 | 0.7027 | 0.5589 |
 | 01b_rf_tuned_raw | 원본 그대로, RF 설정만 조정 (500그루, min_samples_leaf=3) | 0.7201 | 0.7135 | 0.5021 |
 | 02_logreg_fe | 전처리 + 파생변수 + 로지스틱 회귀 | 0.8575 | 0.6454 | 0.2830 |
 | 03_rf_fe | 전처리 + 파생변수 + RF 설정 조정 | 0.7262 | 0.7126 | 0.5020 |
@@ -41,12 +44,15 @@ python src/report.py   # 1분 이내
 | 07_lgbm_fe_id | 04 + 고객 식별키(정수 코드) | 0.7121 | 0.7182 | 0.5190 |
 | 08_ensemble | 06×0.93 + 07×0.07 (OOF로 가중치 탐색) | **0.6748** | 0.7358 | 0.5744 |
 
+공식 Baseline 노트북 자체 출력은 1.0497입니다(원래 분할 seed 55, RandomForest seed 미지정). 같은 분할에서 RandomForest seed만 0~4로 바꾸면 1.0512~1.0699(평균 1.0617)이 나옵니다. 위 표의 1.0738은 다른 실험과 같은 분할(seed 42)로 돌린 값이라 이 값끼리 비교합니다.
+
 정확한 값은 `outputs/results.csv`에 있습니다(라이브러리 버전이 다르면 소수 넷째 자리가 조금 달라질 수 있음).
 
 ### 결과에서 읽을 점
 
-- **Baseline이 "클래스 비율만 찍기"(0.8824)보다도 나쁩니다(0.9242).** 기본 RandomForest는 잎이 1개 샘플까지 자라서 확률을 0이나 1에 가깝게 냅니다. 확신하고 틀리는 경우가 많아 LogLoss가 크게 나빠집니다.
-- **가장 큰 개선 1: 확률을 부드럽게 내는 설정.** `min_samples_leaf=3`만으로 0.9242 → 0.7201(22% 감소).
+- **공식 Baseline(1.0738)은 "클래스 비율만 찍기"(0.8824)보다도 나쁩니다.** 기본 RandomForest는 잎이 1개 샘플까지 자라서 확률을 0이나 1에 가깝게 냅니다. 확신하고 틀리는 경우가 많아 LogLoss가 크게 나빠집니다. 여기에 직업 열 삭제와 구간화로 정보가 줄었고, 행 번호인 `index` 열까지 입력에 들어가 있습니다.
+- 구간화하지 않고 원본 값을 쓰면 같은 RandomForest 기본값으로도 0.9242가 됩니다.
+- **가장 큰 개선 1: 확률을 부드럽게 내는 설정.** `min_samples_leaf=3`만으로 0.9242 → 0.7201.
 - **가장 큰 개선 2: 고객 식별키.** begin_month를 뺀 신상 정보가 같으면 같은 고객으로 보면 26,457행이 고객 8,759명입니다. test의 88.4%가 train에 있는 고객이라, CatBoost가 고객별 연체 성향을 학습하면 0.7383 → 0.6750으로 좋아집니다.
 - 개별 범주형 변수(직업, 학력 등)는 credit 비율 차이가 거의 없어 단독으로는 신호가 약합니다.
 - 변수 중요도(LightGBM gain) 1위는 카드 보유 기간 `card_months`(24%)이고, 그다음이 고객 식별키, 나이, 근속 관련 변수입니다.
@@ -57,11 +63,11 @@ python src/report.py   # 1분 이내
 
 - `outputs/submission_ensemble.csv` : 최종 후보 (OOF 0.6748)
 - `outputs/submission_catboost_id.csv` : CatBoost 단독 (OOF 0.6750)
-- `outputs/submission_baseline_rf.csv` : Baseline (비교용)
+- `outputs/submission_dacon_baseline.csv` : DACON 공식 Baseline (비교용)
 
 ## 다음 할 일
 
-1. Optuna로 CatBoost/LightGBM 튜닝 (목표 OOF 0.665 이하)
+1. Optuna로 CatBoost/LightGBM 튜닝 (목표 OOF 0.665 이하, 공식 Baseline 대비 38% 감소)
 2. LightGBM에 고객키 OOF target encoding 적용
 3. CatBoost 여러 seed 평균
 4. 신규 고객 성능 확인용 GroupKFold(고객 단위) 참고 실험

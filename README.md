@@ -17,7 +17,8 @@ src/ceiling.py         정확도 상한 분석 (같은 입력의 정답 불일�
 src/validity_check.py  점수 부풀림 점검 (조기 종료 누수, 중복 기록, 신규 고객 성능)
 src/variable_analysis.py  중간보고서 탭 3 변수 분석 검증
 src/group_experiments.py  중간보고서 탭 3 실험 A~E (LogReg / RandomForest / CatBoost)
-docs/중간보고서_탭3_실험결과.md  위 두 스크립트의 결과 정리
+src/group_noise_check.py  고객 단위 분할 A~E를 3번 반복해 차이가 우연인지 확인
+docs/중간보고서_탭3_실험결과.md  위 스크립트들의 결과 정리
 outputs/results.csv    실험별 점수
 outputs/submission_*.csv  DACON 제출 파일
 outputs/figures/       그림
@@ -35,6 +36,8 @@ python src/improve.py  # 약 6분, 최종 블렌드 + outputs/submission_blend.c
 python src/ceiling.py  # 1분 이내
 python src/variable_analysis.py   # 1분 이내
 python src/group_experiments.py   # 약 30분 (CatBoost가 대부분)
+python src/group_experiments.py --customer-split   # 약 10분, 고객 단위 분할
+python src/group_noise_check.py   # 약 10분
 python src/plot_groups.py
 ```
 

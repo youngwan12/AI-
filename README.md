@@ -14,6 +14,9 @@ src/train.py           Baseline부터 단계별 실험 (5-fold) + 제출 파일 
 src/report.py          발표용 그림 (실험 결과, 혼동행렬, 신뢰도 곡선, 변수 중요도)
 src/improve.py         추가 실험: 고객 이력 target encoding, 동일 카드 정보, 고객 내 상대 위치
 src/ceiling.py         정확도 상한 분석 (같은 입력의 정답 불일치, Top-2, 확신도별 정확도)
+src/variable_analysis.py  중간보고서 탭 3 변수 분석 검증
+src/group_experiments.py  중간보고서 탭 3 실험 A~E (LogReg / RandomForest / CatBoost)
+docs/중간보고서_탭3_실험결과.md  위 두 스크립트의 결과 정리
 outputs/results.csv    실험별 점수
 outputs/submission_*.csv  DACON 제출 파일
 outputs/figures/       그림
@@ -29,6 +32,9 @@ python src/baseline_dacon.py  # 1분, 공식 Baseline 점수를 results.csv 맨 
 python src/report.py   # 1분 이내
 python src/improve.py  # 약 6분, 최종 블렌드 + outputs/submission_blend.csv
 python src/ceiling.py  # 1분 이내
+python src/variable_analysis.py   # 1분 이내
+python src/group_experiments.py   # 약 30분 (CatBoost가 대부분)
+python src/plot_groups.py
 ```
 
 ## 사전 실험 결과 (Stratified 5-fold OOF, seed 42)

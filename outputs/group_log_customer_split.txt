@@ -1,0 +1,38 @@
+A. 모든 변수               LogReg       logloss 0.8692  acc 0.6420  (8.7s)
+A. 모든 변수               RandomForest logloss 0.8280  acc 0.6889  (33.4s)
+A. 모든 변수               CatBoost     logloss 0.8108  acc 0.6902  (19.5s)
+B. 소득·고용               LogReg       logloss 0.8856  acc 0.6401  (1.0s)
+B. 소득·고용               RandomForest logloss 0.9502  acc 0.6170  (12.1s)
+B. 소득·고용               CatBoost     logloss 0.8826  acc 0.6413  (6.5s)
+C. 카드기간·연령             LogReg       logloss 0.8641  acc 0.6413  (0.2s)
+C. 카드기간·연령             RandomForest logloss 0.9670  acc 0.6500  (14.9s)
+C. 카드기간·연령             CatBoost     logloss 0.8092  acc 0.6909  (2.8s)
+D. 자산·가족               LogReg       logloss 0.8831  acc 0.6413  (0.9s)
+D. 자산·가족               RandomForest logloss 0.8944  acc 0.6387  (8.2s)
+D. 자산·가족               CatBoost     logloss 0.8822  acc 0.6413  (6.7s)
+A에서 소득·고용 제외           LogReg       logloss 0.8657  acc 0.6418  (3.6s)
+A에서 소득·고용 제외           RandomForest logloss 0.8481  acc 0.6857  (20.5s)
+A에서 소득·고용 제외           CatBoost     logloss 0.8099  acc 0.6906  (14.3s)
+A에서 카드기간·연령 제외         LogReg       logloss 0.8869  acc 0.6402  (10.2s)
+A에서 카드기간·연령 제외         RandomForest logloss 0.9153  acc 0.6339  (20.5s)
+A에서 카드기간·연령 제외         CatBoost     logloss 0.8821  acc 0.6413  (14.6s)
+A에서 자산·가족 제외           LogReg       logloss 0.8684  acc 0.6410  (6.8s)
+A에서 자산·가족 제외           RandomForest logloss 0.8352  acc 0.6875  (27.8s)
+A에서 자산·가족 제외           CatBoost     logloss 0.8110  acc 0.6909  (11.3s)
+E. 전체 + 파생변수           LogReg       logloss 0.8640  acc 0.6442  (11.2s)
+E. 전체 + 파생변수           RandomForest logloss 0.8254  acc 0.6871  (58.0s)
+E. 전체 + 파생변수           CatBoost     logloss 0.8069  acc 0.6901  (26.9s)
+E+. E + 고객 식별키         CatBoost     logloss 0.8073  acc 0.6904  (55.6s)
+
+LogLoss (낮을수록 좋음)
+ model                          LogReg  RandomForest  CatBoost
+key            experiment                                    
+A_all          A. 모든 변수        0.8692        0.8280    0.8108
+B_income_job   B. 소득·고용        0.8856        0.9502    0.8826
+C_period_age   C. 카드기간·연령      0.8641        0.9670    0.8092
+D_asset_family D. 자산·가족        0.8831        0.8944    0.8822
+A-B            A에서 소득·고용 제외    0.8657        0.8481    0.8099
+A-C            A에서 카드기간·연령 제외  0.8869        0.9153    0.8821
+A-D            A에서 자산·가족 제외    0.8684        0.8352    0.8110
+E_all_derived  E. 전체 + 파생변수    0.8640        0.8254    0.8069
+E+_customer_id E+. E + 고객 식별키     NaN           NaN    0.8073

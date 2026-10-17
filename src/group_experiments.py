@@ -12,7 +12,11 @@ E+. E + 고객 식별키      -> 같은 고객의 다른 카드 정보 (CatBoost
 
 모델: Logistic Regression, Random Forest(500그루, min_samples_leaf=3), CatBoost
 검증: StratifiedKFold(5, shuffle, seed 42) - 모든 실험·모델 동일
+
+--customer-split 을 주면 같은 고객의 카드가 학습/검증에 나뉘지 않게 GroupKFold(고객 단위)로 돌린다.
+랜덤 분할에서는 '같은 고객을 알아보는 능력'까지 점수에 섞이므로, 변수 자체의 기여는 이쪽 결과로 본다.
 """
+import sys
 import time
 from pathlib import Path
 
@@ -23,7 +27,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, log_loss
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import GroupKFold, StratifiedKFold
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 
@@ -84,7 +88,13 @@ def main():
     test = pd.read_csv(DATA / "test.csv")
     y = train[TARGET].astype(int)
     X, _, _ = build_features(train, test)
-    folds = list(StratifiedKFold(5, shuffle=True, random_state=SEED).split(X, y))
+    customer_split = "--customer-split" in sys.argv
+    if customer_split:
+        folds = list(GroupKFold(5).split(X, y, groups=X["person_id"]))
+        out_csv = OUT / "group_results_customer_split.csv"
+    else:
+        folds = list(StratifiedKFold(5, shuffle=True, random_state=SEED).split(X, y))
+        out_csv = OUT / "group_results.csv"
 
     rows = []
     for key, label, cols in EXPERIMENTS:
@@ -108,7 +118,7 @@ def main():
             rows.append(r)
             print(f"{label:<22} {model:<12} logloss {r['logloss']:.4f}  acc {r['accuracy']:.4f}  ({r['seconds']}s)",
                   flush=True)
-            pd.DataFrame(rows).to_csv(OUT / "group_results.csv", index=False)
+            pd.DataFrame(rows).to_csv(out_csv, index=False)
 
     res = pd.DataFrame(rows)
     table = res.pivot_table(index=["key", "experiment"], columns="model", values="logloss", sort=False)

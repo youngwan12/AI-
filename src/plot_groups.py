@@ -19,10 +19,8 @@ STYLE = {"LogReg": ("#8C8C8C", "s"), "RandomForest": ("#55A868", "o"), "CatBoost
 PRIOR, BASELINE = 0.8824, 1.0738
 
 
-def main():
-    res = pd.read_csv(OUT / "group_results.csv")
+def draw(ax, res, title):
     keys = list(dict.fromkeys(res["key"]))
-    fig, ax = plt.subplots(figsize=(11, 5.5))
     for model, (color, marker) in STYLE.items():
         sub = res[res["model"] == model].set_index("key")
         ys = [i for i, k in enumerate(keys) if k in sub.index]
@@ -32,12 +30,21 @@ def main():
     for y in [3.5, 6.5]:
         ax.axhline(y, color="#dddddd", lw=1)
     ax.set_yticks(range(len(keys)), [LABELS[k] for k in keys])
-    ax.invert_yaxis()
     ax.set_ylim(len(keys) - 0.5, -1.2)
+    ax.set_xlim(0.65, 0.98)
     ax.set_xlabel("5-fold OOF LogLoss (lower is better)")
-    ax.set_title(f"Experiments A-E (DACON baseline = {BASELINE})")
+    ax.set_title(title)
     ax.grid(axis="x", color="#eeeeee")
-    ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
+
+
+def main():
+    fig, axes = plt.subplots(1, 2, figsize=(15, 5.8), sharey=True)
+    draw(axes[0], pd.read_csv(OUT / "group_results.csv"), "Random split (same customers can appear in train and validation)")
+    split_csv = OUT / "group_results_customer_split.csv"
+    if split_csv.exists():
+        draw(axes[1], pd.read_csv(split_csv), "Customer split (validation customers are all new)")
+    axes[1].legend(loc="upper left", bbox_to_anchor=(1.01, 1))
+    fig.suptitle(f"Experiments A-E (DACON baseline = {BASELINE})")
     plt.tight_layout()
     plt.savefig(OUT / "figures" / "group_experiments.png", dpi=120)
     print("saved", OUT / "figures" / "group_experiments.png")

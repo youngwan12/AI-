@@ -1,0 +1,39 @@
+seed 0 prior(찍기)                          logloss 0.8824  acc 0.6413  [0.1분]
+seed 0 table: card_months                 logloss 0.8114  acc 0.6909  [0.1분]
+seed 0 table: card_months+is_newest       logloss 0.8106  acc 0.6913  [0.2분]
+seed 0 catboost E                         logloss 0.8062  acc 0.6906  [0.9분]
+seed 0 catboost E_REL                     logloss 0.8000  acc 0.6907  [1.5분]
+seed 0 catboost TIME                      logloss 0.7986  acc 0.6909  [1.7분]
+seed 0 catboost E_REL depth4 lr0.03       logloss 0.7998  acc 0.6911  [2.4분]
+seed 0 catboost E_REL depth8 l2=10        logloss 0.8011  acc 0.6913  [3.3분]
+seed 0 ordinal catboost E_REL             logloss 0.7999  acc 0.6908  [3.9분]
+seed 0 mlp E_REL                          logloss 0.8670  acc 0.6668  [4.1분]
+LightGBM 튜닝 결과: {'learning_rate': 0.0985063926171825, 'num_leaves': 4, 'min_child_samples': 190, 'subsample': 0.7865415844553577, 'colsample_bytree': 0.6872185609852748, 'reg_lambda': 0.012096930154131592, 'subsample_freq': 1}
+seed 0 lgbm(tuned) E_REL                  logloss 0.7991  acc 0.6915  [7.5분]
+상위 3개: ['catboost TIME', 'lgbm(tuned) E_REL', 'catboost E_REL depth4 lr0.03']
+seed 0 ensemble(top3 평균)                  logloss 0.7981  acc 0.6912  [7.5분]
+seed 1 catboost E                         logloss 0.8065  acc 0.6909  [8.2분]
+seed 1 catboost TIME                      logloss 0.7990  acc 0.6908  [8.3분]
+seed 1 lgbm(tuned) E_REL                  logloss 0.7996  acc 0.6912  [8.4분]
+seed 1 catboost E_REL depth4 lr0.03       logloss 0.7999  acc 0.6907  [9.1분]
+seed 1 ensemble(top3 평균)                  logloss 0.7985  acc 0.6910  [9.1분]
+seed 2 catboost E                         logloss 0.8053  acc 0.6910  [9.9분]
+seed 2 catboost TIME                      logloss 0.7989  acc 0.6903  [10.0분]
+seed 2 lgbm(tuned) E_REL                  logloss 0.7996  acc 0.6914  [10.0분]
+seed 2 catboost E_REL depth4 lr0.03       logloss 0.7994  acc 0.6912  [10.8분]
+seed 2 ensemble(top3 평균)                  logloss 0.7983  acc 0.6912  [10.8분]
+
+                               logloss_mean  logloss_std  acc_mean  runs
+name                                                                   
+ensemble(top3 평균)                   0.7983       0.0002    0.6912     3
+catboost TIME                       0.7988       0.0002    0.6907     3
+lgbm(tuned) E_REL                   0.7994       0.0003    0.6914     3
+catboost E_REL depth4 lr0.03        0.7997       0.0003    0.6910     3
+ordinal catboost E_REL              0.7999          NaN    0.6908     1
+catboost E_REL                      0.8000          NaN    0.6907     1
+catboost E_REL depth8 l2=10         0.8011          NaN    0.6913     1
+catboost E                          0.8060       0.0007    0.6908     3
+table: card_months+is_newest        0.8106          NaN    0.6913     1
+table: card_months                  0.8114          NaN    0.6909     1
+mlp E_REL                           0.8670          NaN    0.6668     1
+prior(찍기)                           0.8824          NaN    0.6413     1

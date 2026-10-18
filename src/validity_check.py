@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from catboost import CatBoostClassifier
 from sklearn.metrics import accuracy_score, log_loss
-from sklearn.model_selection import GroupKFold, StratifiedKFold, train_test_split
+from sklearn.model_selection import GroupKFold, GroupShuffleSplit, StratifiedKFold, train_test_split
 
 from features import CAT_COLS, TARGET, build_features
 from group_experiments import ALL, DERIVED
@@ -31,12 +31,16 @@ def catboost(Xa, ya, Xs, ys):
     return m
 
 
-def run(X, y, folds, honest):
+def run(X, y, folds, honest, grouped=False):
     oof = np.zeros((len(X), 3))
     for a, b in folds:
         Xa, ya = X.iloc[a], y.iloc[a]
         if honest:  # 학습 fold의 15%를 떼어 멈출 시점 선택용으로만 사용
-            Xt, Xs, yt, ys = train_test_split(Xa, ya, test_size=0.15, stratify=ya, random_state=SEED)
+            if grouped:  # 고객 단위 평가에서는 떼는 15%도 고객 단위로 (같은 고객이 섞이면 너무 오래 학습함)
+                t, s = next(GroupShuffleSplit(1, test_size=0.15, random_state=SEED).split(Xa, ya, groups=Xa["person_id"]))
+                Xt, Xs, yt, ys = Xa.iloc[t], Xa.iloc[s], ya.iloc[t], ya.iloc[s]
+            else:
+                Xt, Xs, yt, ys = train_test_split(Xa, ya, test_size=0.15, stratify=ya, random_state=SEED)
             m = catboost(Xt, yt, Xs, ys)
         else:       # 지금까지 방식: 검증 fold로 멈출 시점 선택
             m = catboost(Xa, ya, X.iloc[b], y.iloc[b])
@@ -70,7 +74,7 @@ def main():
         print(f"[랜덤 5-fold] {tag}: logloss {ll:.4f}, acc {acc:.4f}", flush=True)
 
     # 3) 신규 고객
-    ll, acc = run(X, y, group, honest=True)
+    ll, acc = run(X, y, group, honest=True, grouped=True)
     print(f"[고객 단위 GroupKFold, 신규 고객 가정] logloss {ll:.4f}, acc {acc:.4f}")
 
 

@@ -20,6 +20,7 @@ src/group_experiments.py  중간보고서 탭 3 실험 A~E (LogReg / RandomFores
 src/group_noise_check.py  고객 단위 분할 A~E를 3번 반복해 차이가 우연인지 확인
 src/best_search.py     처음 보는 고객 기준 최선의 방법 탐색 (변수 묶음 × 모델, Optuna, 앙상블)
 src/id_search.py       대회 조건 최종 모델: 고객 ID + CatBoost 설정 비교, seed 평균, 블렌드
+src/final_report.py    최종 모델(CatBoost 단독) 제출 파일, 지표, 발표용 그림
 docs/중간보고서_탭3_실험결과.md  위 스크립트들의 결과 정리
 outputs/results.csv    실험별 점수
 outputs/submission_*.csv  DACON 제출 파일
@@ -42,6 +43,7 @@ python src/group_experiments.py --customer-split   # 약 10분, 고객 단위 �
 python src/group_noise_check.py   # 약 10분
 python src/best_search.py         # 약 11분 (--honest-check: 누수 없는 재평가)
 python src/id_search.py           # 약 60분, outputs/submission_final.csv
+python src/final_report.py        # 1분 이내, outputs/submission_catboost_final.csv + 발표용 그림
 python src/plot_groups.py
 ```
 
@@ -160,9 +162,32 @@ LogLoss는 0.6748 → 0.6717로 조금 더 좋아졌지만 정확도는 73~74%�
 - 고객 ID를 만드는 열을 줄여도(16개 → 생일·입사일 2개) 고유 고객 수가 9,429~9,728명으로 거의 같아 큰 차이가 없습니다.
 - 검증에서 같은 고객이 학습 쪽에 있는 비율은 84.7%, test는 88.4%입니다. 아는 고객과 처음 보는 고객의 점수를 test 비율로 다시 가중하면 최종 블렌드는 약 **0.6680**입니다. 공유된 1위 점수와 약 0.01 차이이며, 실제 비교는 DACON 제출로 확인해야 합니다.
 
+## 최종 모델: CatBoost 단독 (`src/final_report.py`)
+
+블렌드(0.6713)와 차이가 0.0012로 작아, 설명이 단순한 CatBoost 단독을 최종 모델로 정했습니다.
+구성: 원본 변수 전부 범주형 + 카드 기간·파생변수 + 고객 식별키, lr 0.03, depth 6, seed 5개 평균 (`id_search.py`의 12번).
+
+| 지표 | 값 |
+| --- | --- |
+| 5-fold OOF LogLoss | **0.6725** (DACON 공식 Baseline 1.0738 대비 37.4% 감소) |
+| test의 기존 고객 비율(88.4%)로 다시 가중한 LogLoss | 약 0.6695 |
+| 정확도 / Top-2 정확도 | 73.7% / 92.8% |
+| 처음 보는 고객 기준 (고객 단위 분할, 별도 모델) | 0.7983 |
+
+발표용 그림 (`outputs/figures/`)
+
+| 그림 | 보여주는 것 |
+| --- | --- |
+| `final_1_card_age.png` | 신호 1: 발급 1년 미만 카드는 credit 2가 46.7%, 5년 된 카드는 73.2% |
+| `final_2_customer_id.png` | 신호 2: 고객 ID는 대회 조건에서 0.7383 → 0.6750, 처음 보는 고객에게는 효과 없음(0.8069 vs 0.8073) |
+| `group_experiments.png` | 변수 그룹 실험: 고객 단위 분할에서는 카드기간·연령만 예측력이 있음 |
+| `final_3_calibration.png` | 예측 확률이 실제 비율과 맞는지: 최종 모델은 대각선에 붙고 Baseline은 벗어남 |
+| `final_4_confusion.png` | 등급별 정답률: credit 2는 94%, credit 0은 25% |
+
 ## 제출 파일
 
-- `outputs/submission_final.csv` : **최종 후보** (OOF LogLoss 0.6713, test 고객 비율 환산 약 0.6680, 정확도 73.7%)
+- `outputs/submission_catboost_final.csv` : **최종 제출** (CatBoost 단독, OOF LogLoss 0.6725, 정확도 73.7%)
+- `outputs/submission_final.csv` : 블렌드 (OOF 0.6713, 참고용)
 - `outputs/submission_blend.csv` : 이전 최종 (OOF 0.6717)
 - `outputs/submission_ensemble.csv` : 이전 최종 (OOF 0.6748)
 - `outputs/submission_catboost_id.csv` : CatBoost 단독 (OOF 0.6750)

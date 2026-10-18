@@ -1,0 +1,13 @@
+{
+  "logloss": 0.672529025520066,
+  "accuracy": 0.7365914502778093,
+  "top2_accuracy": 0.9280341686510186,
+  "reduction_vs_baseline": 0.37369247018060536,
+  "logloss_known_customers": 0.6600938423914583,
+  "logloss_new_customers": 0.7412276623750762,
+  "share_known_in_validation": 0.8467324337604415,
+  "share_known_in_test": 0.8843,
+  "logloss_reweighted_to_test": 0.6694810253635629,
+  "accuracy_known": 0.7368092134630837,
+  "accuracy_new": 0.7353884093711467
+}

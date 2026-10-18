@@ -19,6 +19,7 @@ src/variable_analysis.py  중간보고서 탭 3 변수 분석 검증
 src/group_experiments.py  중간보고서 탭 3 실험 A~E (LogReg / RandomForest / CatBoost)
 src/group_noise_check.py  고객 단위 분할 A~E를 3번 반복해 차이가 우연인지 확인
 src/best_search.py     처음 보는 고객 기준 최선의 방법 탐색 (변수 묶음 × 모델, Optuna, 앙상블)
+src/id_search.py       대회 조건 최종 모델: 고객 ID + CatBoost 설정 비교, seed 평균, 블렌드
 docs/중간보고서_탭3_실험결과.md  위 스크립트들의 결과 정리
 outputs/results.csv    실험별 점수
 outputs/submission_*.csv  DACON 제출 파일
@@ -40,6 +41,7 @@ python src/group_experiments.py   # 약 30분 (CatBoost가 대부분)
 python src/group_experiments.py --customer-split   # 약 10분, 고객 단위 분할
 python src/group_noise_check.py   # 약 10분
 python src/best_search.py         # 약 11분 (--honest-check: 누수 없는 재평가)
+python src/id_search.py           # 약 60분, outputs/submission_final.csv
 python src/plot_groups.py
 ```
 
@@ -137,11 +139,31 @@ LogLoss는 0.6748 → 0.6717로 조금 더 좋아졌지만 정확도는 73~74%�
 - 카드 기간별 비율표 하나만으로 0.8114가 나옵니다. 처음 보는 고객에 대한 정보가 사실상 카드 기간에 몰려 있다는 뜻입니다.
 - 조기 종료 누수 점검: CatBoost TIME을 멈출 시점까지 고객 단위로 떼어 고르고 전체 재학습하면 0.7994~0.7998로, 차이는 0.0007 정도입니다(`python src/best_search.py --honest-check`).
 - 정확도는 69.1%에서 변하지 않습니다. 좋아진 것은 확률이 얼마나 정확한가(LogLoss)입니다.
-- 대회 조건(랜덤 분할)에서는 이 모델을 기존 최종 블렌드에 섞어도 가중치가 0으로 나와 0.6717 그대로입니다. 대회 제출은 `submission_blend.csv`가 최선입니다.
+- 대회 조건(랜덤 분할)에서는 이 모델을 기존 최종 블렌드에 섞어도 가중치가 0으로 나와 도움이 되지 않습니다. 대회 제출용은 아래 `id_search.py` 결과를 씁니다.
+
+## 대회 조건 끌어올리기: 고객 ID + CatBoost (`src/id_search.py`)
+
+대회 상위권 공유 코드의 공통점(고객 ID 변수 + CatBoost, 튜닝, K-fold)을 따라 랜덤 5-fold에서 비교했습니다.
+참고로 공유된 Private 점수는 [1위 0.6581](https://dacon.io/en/codeshare/2768), [5위 0.66016](https://dacon.io/en/competitions/official/235713/codeshare/2746), [5위 0.66203](https://www.dacon.io/en/competitions/official/235713/codeshare/2750), [11위 0.66264](https://dacon.io/codeshare/2767)입니다.
+
+| 실험 | LogLoss | 정확도 |
+| --- | --- | --- |
+| CatBoost, E + 고객 ID (lr 0.05) | 0.6748 | 73.6% |
+| CatBoost, E + 고객 내 카드 위치 + 고객 ID + 동일 카드 ID | 0.6747 | 73.7% |
+| CatBoost, 원본 변수를 전부 범주형으로 + 고객 ID (lr 0.05) | 0.6735 | 73.7% |
+| 위 구성, lr 0.03 | 0.6734 | 73.7% |
+| 위 구성, lr 0.03, depth 4 | 0.6736 | 73.8% |
+| 위 구성, lr 0.03, depth 8, l2 10 | 0.6746 | 73.7% |
+| **위 구성(lr 0.03, depth 6), seed 5개 평균** | **0.6725** | 73.7% |
+| **최종 블렌드: 09×0.4 + 10×0.1 + seed 평균×0.5** | **0.6713** (가중치 정직 평가) | **73.7%** |
+
+- 고객 ID를 만드는 열을 줄여도(16개 → 생일·입사일 2개) 고유 고객 수가 9,429~9,728명으로 거의 같아 큰 차이가 없습니다.
+- 검증에서 같은 고객이 학습 쪽에 있는 비율은 84.7%, test는 88.4%입니다. 아는 고객과 처음 보는 고객의 점수를 test 비율로 다시 가중하면 최종 블렌드는 약 **0.6680**입니다. 공유된 1위 점수와 약 0.01 차이이며, 실제 비교는 DACON 제출로 확인해야 합니다.
 
 ## 제출 파일
 
-- `outputs/submission_blend.csv` : **최종 후보** (OOF LogLoss 0.6717, 정확도 73.7%)
+- `outputs/submission_final.csv` : **최종 후보** (OOF LogLoss 0.6713, test 고객 비율 환산 약 0.6680, 정확도 73.7%)
+- `outputs/submission_blend.csv` : 이전 최종 (OOF 0.6717)
 - `outputs/submission_ensemble.csv` : 이전 최종 (OOF 0.6748)
 - `outputs/submission_catboost_id.csv` : CatBoost 단독 (OOF 0.6750)
 - `outputs/submission_dacon_baseline.csv` : DACON 공식 Baseline (비교용)

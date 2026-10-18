@@ -1,0 +1,17 @@
+F_ID lr0.05 d6                           logloss 0.6748  acc 0.7356  [2.6분]
+F_ID2 lr0.05 d6                          logloss 0.6747  acc 0.7369  [5.0분]
+F_CATALL lr0.05 d6                       logloss 0.6735  acc 0.7370  [9.0분]
+F_CATALL lr0.03 d6                       logloss 0.6734  acc 0.7374  [15.9분]
+F_CATALL lr0.03 d4                       logloss 0.6736  acc 0.7379  [21.5분]
+F_CATALL lr0.03 d8 l2=10                 logloss 0.6746  acc 0.7365  [31.9분]
+1단계 최고: F_CATALL {'learning_rate': 0.03}
+seed 0                                   logloss 0.6740  acc 0.7364  [38.1분]
+seed 1                                   logloss 0.6737  acc 0.7366  [44.1분]
+seed 2                                   logloss 0.6738  acc 0.7368  [50.7분]
+seed 3                                   logloss 0.6734  acc 0.7360  [56.8분]
+seed 4                                   logloss 0.6735  acc 0.7361  [62.0분]
+F_CATALL {'learning_rate': 0.03} seed 5개 평균 logloss 0.6725  acc 0.7366  [62.0분]
+최종 블렌드 (가중치 정직 평가)                       logloss 0.6713  acc 0.7373  [62.2분]
+블렌드 가중치 (09, 10, 06, 12): [0.4 0.1 0.  0.5]
+전체 가중치로 섞은 OOF: 0.6712
+saved outputs/submission_final.csv

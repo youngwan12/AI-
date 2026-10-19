@@ -1,0 +1,23 @@
+0. Baseline            RandomForest logloss 1.0738  acc 0.6169  [0.1분]
+1. begin_month         RandomForest logloss 0.8110  acc 0.6902  [0.3분]
+1. begin_month         CatBoost     logloss 0.8084  acc 0.6900  [0.4분]
+2. begin_month + 고객 ID RandomForest logloss 0.7635  acc 0.7175  [0.8분]
+2. begin_month + 고객 ID CatBoost     logloss 0.6738  acc 0.7364  [1.3분]
+3. 최종 (seed 3)         CatBoost     logloss 0.6734  acc 0.7360  [9.9분]
+{
+  "final_logloss": 0.673419077144846,
+  "final_accuracy": 0.7360244925728541,
+  "final_top2": 0.9283365460936615,
+  "baseline_logloss": 1.073797415635335,
+  "baseline_accuracy": 0.6169255773519295,
+  "class_recall_final": [
+    0.2572936064556176,
+    0.44263602999840435,
+    0.9352899575671852
+  ],
+  "class_recall_baseline": [
+    0.13811297330850403,
+    0.2615286420935057,
+    0.8391089108910891
+  ]
+}

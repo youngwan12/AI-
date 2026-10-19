@@ -1,0 +1,7 @@
+group,model,features,logloss,accuracy,macro_f1,minutes
+0. Baseline,RandomForest,"DACON 공식 전처리(구간화, 직업 삭제)",1.073797415635335,0.6169255773519295,0.4189833233010865,0.1
+1. begin_month,RandomForest,begin_month,0.8110326274926132,0.6901765128321428,0.38312147447282935,0.3
+1. begin_month,CatBoost,begin_month,0.8084229568817258,0.6900253241108213,0.3847854233555912,0.4
+2. begin_month + 고객 ID,RandomForest,begin_month + 고객 ID별 credit 비율(fold 밖),0.7634797658670464,0.7174660770306535,0.5607143700454175,0.8
+2. begin_month + 고객 ID,CatBoost,begin_month + 고객 ID(범주형),0.6738006277192488,0.7364402615564879,0.573575570227791,1.3
+3. 최종 (seed 3),CatBoost,원본 변수 전부 범주형 + 파생변수 + begin_month + 고객 ID,0.673419077144846,0.7360244925728541,0.5786910883237123,9.9
